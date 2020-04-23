@@ -1,0 +1,7 @@
+REGION = "ap-south-1"
+MAIN_BUCKET = "sudarshan-1052063"
+STACK_NAME = "sud"
+TEMPLATE_URL = "https://" + MAIN_BUCKET + ".s3." + REGION + ".amazonaws.com/template.yaml"
+HOST_BUCKET_NAME = "sud-text-to-mp3.com"
+API_NAME = "text-to-mp3"
+LAMBDA_VERSION=""

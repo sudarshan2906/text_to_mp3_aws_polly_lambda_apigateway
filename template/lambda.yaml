@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "-"
+
+Parameters:
+  LambdaFunctionName:
+    Type: String
+  MainBucket:
+    Type: String
+  LambdaVersion:
+    Type: String
+  Region:
+    Type: String
+  HostBucketName:
+    Type: String
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "lambdarole-${LambdaFunctionName}"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+        Version: 2012-10-17
+      Path: /
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: "*"
+                Resource: "*"
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Code:
+        S3Bucket: !Ref MainBucket
+        S3Key: 'lambda_function.zip'
+        S3ObjectVersion: !Ref LambdaVersion
+      Handler: lambda_function.handler
+      Runtime: python3.7
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref HostBucketName
+          REGION: !Ref Region
+      Timeout: 900
+
+Outputs:
+  LambdaFunctionArn:
+    Value: !GetAtt LambdaFunction.Arn

@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "testing"
+
+Parameters:
+  MainBucket:
+    Type: String
+  HostBucketName:
+    Type: String
+  Region:
+    Type: String
+  LambdaVersion:
+    Type: String
+
+Resources:
+  S3:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${MainBucket}.s3.${Region}.amazonaws.com/s3.yaml"
+      Parameters:
+        BucketName: !Ref HostBucketName
+      TimeoutInMinutes: 10
+
+  Lambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${MainBucket}.s3.${Region}.amazonaws.com/lambda.yaml"
+      Parameters:
+        LambdaFunctionName: "text-to-mp3"
+        MainBucket: !Ref MainBucket
+        LambdaVersion: !Ref LambdaVersion
+        Region: !Ref Region
+        HostBucketName: !Ref HostBucketName
+      TimeoutInMinutes: 10
+
+  ApiGateway:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${MainBucket}.s3.${Region}.amazonaws.com/api_gateway.yaml"
+      Parameters:
+        ApiName: "text-to-mp3"
+        LambdaFunctionArn: !GetAtt Lambda.Outputs.LambdaFunctionArn
+      TimeoutInMinutes: 15
